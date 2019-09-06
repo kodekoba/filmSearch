@@ -1,10 +1,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { Route, BrowserRouter as Router } from 'react-router-dom'
+import 'typeface-roboto'
 
-import Home from './Home'
-import Search from './Search'
-import Details from './Details'
+import Home from './components/pages/Home'
+import Search from './components/pages/Search'
+import Details from './components/pages/Details'
 
 import * as serviceWorker from './serviceWorker'
 
