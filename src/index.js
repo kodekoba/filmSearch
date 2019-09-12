@@ -4,8 +4,8 @@ import { Route, BrowserRouter as Router } from 'react-router-dom'
 import 'typeface-roboto'
 
 import Home from './components/pages/Home'
-import Search from './components/pages/Search'
 import Details from './components/pages/Details'
+import './App.css'
 
 import * as serviceWorker from './serviceWorker'
 
@@ -13,7 +13,6 @@ const routing = (
   <Router>
     <div>
       <Route exact path="/" component={Home} />
-      <Route exact path="/search" component={Search} />
       <Route exact path="/details" component={Details} />
     </div>
   </Router>
