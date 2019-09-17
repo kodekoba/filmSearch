@@ -104,6 +104,7 @@
   margin-right: 0px;
   border: 1px solid black;
   font-weight: bold;
+  max-height: 25px;
 }
 .movieGenreStyle {
   text-align: left;
@@ -115,7 +116,14 @@
 }
 .detailsBlackBackground {
   background-color: black;
-  height: 540px;
+  min-height: 540px;
+}
+.detailsPictureStyle {
+  margin: 0px auto;
+  background-image: url('/public/detailsBG.jpg');
+  background-repeat: no-repeat;
+  background-size: auto;
+  width: 80%;
 }
 .backToSearchButton {
   margin: 20px 0;
@@ -149,7 +157,7 @@
 }
 .movieTitleHeader {
   margin: 18px 0px;
-  font-size: 42px;
+  font-size: 38px;
   font-weight: bold;
   color: #EB5757;
 }
@@ -174,10 +182,10 @@
 .descStyle {
   margin: 10px 0;
   font-weight: normal;
-  font-size: 28px;
+  font-size: 20px;
 }
 .directorAndCast {
-  font-size: 20px;
+  font-size: 16px;
   color: #828282;
 }
 .footerStyle {
@@ -192,4 +200,7 @@
   margin-left: 10px;
   height: 25px;
   vertical-align: middle;
+}
+.noDisplayNav {
+  visibility: hidden;
 }

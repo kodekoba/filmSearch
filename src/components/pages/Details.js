@@ -1,58 +1,123 @@
-import React, { Component } from 'react'
-import { Link } from 'react-router-dom'
+import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 
-import Footer from '../layout/Footer'
+import Footer from '../layout/Footer';
 
-import CssBaseline from '@material-ui/core/CssBaseline'
-import Button from '@material-ui/core/Button'
+import CssBaseline from '@material-ui/core/CssBaseline';
+import Button from '@material-ui/core/Button';
+import axios from 'axios';
 
 class Details extends Component {
   state = {
-    movieList: [
-      {
-        "title": "PRINCESS MONONOKE",
-        "image": "https://image.tmdb.org/t/p/w300_and_h450_bestv2/mNqZOtJIQfFQPjo3hmYLIn8Qqhf.jpg",
-        "genre": "Animation, Adventure, Family",
-        "year": "1997"
-      },
-      {
-        "title": "MY NEIGHBOR TOTORO",
-        "image": "https://image.tmdb.org/t/p/w300_and_h450_bestv2/rtGDOeG9LzoerkDGZF9dnVeLppL.jpg",
-        "genre": "Animation, Adventure, Family",
-        "year": "1988"
-      },
-      {
-        "title": "SPIRITED AWAY",
-        "image": "https://image.tmdb.org/t/p/w300_and_h450_bestv2/oRvMaJOmapypFUcQqpgHMZA6qL9.jpg",
-        "genre": "Animation, Adventure, Family",
-        "year": "2001"
-      }
-    ],
-    selectedMovieInfo: {
-      "title": "Spirited Away",
-      "image": "https://image.tmdb.org/t/p/w300_and_h450_bestv2/oRvMaJOmapypFUcQqpgHMZA6qL9.jpg",
-      "year": "2001",
-      "length": "125",
-      "description": "During her family's move to the suburbs, a sullen 10-year-old girl wanders into a world ruled by gods, witches, and spirits, and where humans are changed into beasts.",
-      "director": "Hayao Miyazaki",
-      "cast": "Rumi Hiiragi, Miyu Irino, Mari Natsuki, Takashi Naito, Yasuko Sawaguchi, Tatsuya Gashuin, Ryunosuke Kamiki, Yumi Tamai",
-      "rating": "4.3"
-    }
+    genreMap:{},
+    similarMoviesList: [],
+    selectedMovieInfo: {},
+    selectedMovieCast: [],
+    movie_id: null,
+    director: null,
   }
 
+  constructor(props) {
+    super(props);
+    this.state.movie_id = this.props.match.params.id;
+  }
+
+  componentDidMount(){
+    this.getAllGenres();
+    this.allRequests();
+  }
+
+  setMovieId = (movie) => {
+    this.setState({
+      movie_id: movie.movie_id
+    })
+  }
+
+  getAllGenres = () => {
+    let env = process.env.REACT_APP_API_KEY;
+    axios.get(`https://api.themoviedb.org/3/genre/movie/list?api_key=${env}&language=en-US`)
+      .then(res => {
+        let tempMap = {}
+        let genreObjs = res.data.genres;
+        for (let i in genreObjs) {
+          let key = genreObjs[i].id.toString();
+          let value = genreObjs[i].name;
+          tempMap[key] = value;
+        }
+        this.setState({
+          genreMap: tempMap
+        });
+      });
+  }
+
+  allRequests = () => {
+    document.getElementById("topElement").scrollIntoView({block:'start',behavior:'smooth'});
+    let env = process.env.REACT_APP_API_KEY;
+    let movie_id = this.state.movie_id;
+    axios.get(`https://api.themoviedb.org/3/movie/${movie_id}?api_key=${env}&language=en-US`)
+      .then(res => {
+        this.setState({
+          selectedMovieInfo: res.data
+        });
+      });
+    axios.get(`https://api.themoviedb.org/3/movie/${movie_id}/credits?api_key=${env}`)
+      .then(res => {
+        this.setState({
+          director: res.data.crew[0].name,
+          selectedMovieCast: res.data.cast.slice(1,10)
+        });
+      });
+    axios.get(`https://api.themoviedb.org/3/movie/${movie_id}/similar?api_key=${env}&language=en-US&page=1`)
+      .then(res => {
+        this.setState({
+          similarMoviesList: res.data.results
+        });
+      });
+  }
+
+  getSelectedMovieYear = () => {
+    let year_string = '' + this.state.selectedMovieInfo.release_date;
+    return year_string.substring(0, 4);
+  }
+
+  getCast = () => {
+    let cast_string = '';
+    for (let cast_member in this.state.selectedMovieCast) {
+      cast_string += this.state.selectedMovieCast[cast_member].character + ", ";
+    }
+    return cast_string.substring(0, cast_string.length - 2);
+  }
+
+
   render(){
-     let movies = this.state.movieList.map(function(movie, i){
+
+    let getYear = ({movie}) => {
+      let year_string = '' + movie.release_date;
+      return year_string.substring(0, 4);
+    }
+
+    let getGenres = ({movie}) => {
+      let genre_string = '';
+      for (let genre_id in movie.genre_ids) {
+        genre_string += this.state.genreMap[movie.genre_ids[genre_id]] + ", ";
+      }
+      return genre_string.substring(0, genre_string.length - 2);
+    }
+
+    let movies = this.state.similarMoviesList.map((movie, i)=>{
       return (
         <div className="resultItemStyle" key={i}>
-          <Link to="/details">
-            <img src={movie.image} alt="" />
+          <Link to={`/details/${movie.id}`} onClick={() => this.setState({
+              movie_id:movie.id
+            },() => this.allRequests())}>
+            <img src={`https://image.tmdb.org/t/p/w300_and_h450_bestv2${movie.poster_path}`} alt="" />
           </Link>
           <div className="movieTextStyle">
             <div className="movieFlexStyle">
               <div className="movieTitleStyle">{movie.title}</div>
-              <div className="movieYearStyle">{movie.year}</div>
+              <div className="movieYearStyle">{getYear({movie})}</div>
             </div>
-            <span className="movieGenreStyle">{movie.genre}</span>
+            <span className="movieGenreStyle">{getGenres({movie})}</span>
           </div>
         </div>
       )
@@ -61,8 +126,8 @@ class Details extends Component {
       <React.Fragment>
         <CssBaseline />
         <div className="App">
-          <header className="detailsBlackBackground">
-            <div className="pictureStyle">
+          <header className="detailsBlackBackground" id="topElement">
+            <div className="detailsPictureStyle">
               <div>                
                 <title className="filmSearchTitle">
                     filmSearch
@@ -74,23 +139,28 @@ class Details extends Component {
                 </Link>
               </div>
               <div className='movieContent'>
-                <img className="movieContentImg" src={this.state.selectedMovieInfo.image} alt="" />
+                <img className="movieContentImg" 
+                src={`https://image.tmdb.org/t/p/w300_and_h450_bestv2${this.state.selectedMovieInfo.poster_path}`} alt="" />
                 <div className="movieContentInfo">
                   <div className="titleAndRating">
                     <h1 className="movieTitleHeader">{this.state.selectedMovieInfo.title}</h1>
-                    <div className="ratingStyle">{this.state.selectedMovieInfo.rating}</div>
+                    <div className="ratingStyle">{this.state.selectedMovieInfo.vote_average}</div>
                   </div>
-                  <h2 className="yearAndLength">{this.state.selectedMovieInfo.year} | {this.state.selectedMovieInfo.length} minutes</h2>
-                  <p className="descStyle">{this.state.selectedMovieInfo.description}</p>
-                  <p className="directorAndCast">Director: {this.state.selectedMovieInfo.director}</p>
-                  <p className="directorAndCast">Cast: {this.state.selectedMovieInfo.cast}</p>
+                  <h2 className="yearAndLength">{this.getSelectedMovieYear()} | {this.state.selectedMovieInfo.runtime} minutes</h2>
+                  <p className="descStyle">{this.state.selectedMovieInfo.overview}</p>
+                  <p className="directorAndCast">
+                    Director: {this.state.director}
+                  </p>
+                  <p className="directorAndCast">
+                    Cast: {this.getCast()}
+                  </p>
                 </div>
               </div>
             </div>
           </header>
           <div className="resultsInfoStyle">
             <div className="resultsInfoWidth">
-              Films by {this.state.selectedMovieInfo.director}
+              Similar Movies
             </div>
           </div>
           <div className="resultsStyle">
