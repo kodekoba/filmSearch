@@ -126,15 +126,15 @@
   width: 80%;
 }
 .backToSearchButton {
-  margin: 20px 0;
-  float: right;
-  text-decoration: none;
-  color: #EB5757;
-  background-color: #F5F5F5;
-  border: none;
-  padding: 3px 30px;
-  font-weight: bold;
-  font-size: 20px;
+  margin: 20px 0 !important;
+  float: right !important;
+  text-decoration: none !important;
+  color: #EB5757 !important;
+  background-color: #F5F5F5 !important;
+  border: none !important;
+  padding: 3px 30px !important;
+  font-weight: bold !important;
+  font-size: 20px !important;
 }
 .movieContent {
   width: 100%;

@@ -8,6 +8,11 @@ import Button from '@material-ui/core/Button';
 import axios from 'axios';
 
 class Home extends Component {
+
+  options = {
+    env: 'b0be95ae49326c255b2b818fcb1beb1d', //process.env.REACT_APP_API_KEY,
+  }
+
   state = {
     genreMap:{},
     featuredList: [],
@@ -19,14 +24,10 @@ class Home extends Component {
     totalPages: 1,
     totalResults: 0,
   }
-
-  // constructor(props) {
-  //   super(props);
-  // }
   
-  componentDidMount(){
+  componentDidMount() {
     let env = process.env.REACT_APP_API_KEY;
-    axios.get(`https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&language=en-US&page=1&api_key=${env}`)
+    axios.get(`https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&language=en-US&page=1&api_key=${this.options.env}`)
       .then(res => {
         this.setState({featuredList: res.data.results})
         this.state.sortByRating ? this.sortMovies('rate') : this.sortMovies('date')
@@ -39,7 +40,7 @@ class Home extends Component {
 
   getAllGenres = () => {
     let env = process.env.REACT_APP_API_KEY;
-    axios.get(`https://api.themoviedb.org/3/genre/movie/list?api_key=${env}&language=en-US`)
+    axios.get(`https://api.themoviedb.org/3/genre/movie/list?api_key=${this.options.env}&language=en-US`)
       .then(res => {
         let tempMap = {}
         let genreObjs = res.data.genres;
@@ -57,7 +58,7 @@ class Home extends Component {
   searchRequest(value) {
     let env = process.env.REACT_APP_API_KEY;
     let page = this.state.resultPage;
-    axios.get(`https://api.themoviedb.org/3/search/movie?api_key=${env}&language=en-US&query=${value}&page=${page}&include_adult=false`)
+    axios.get(`https://api.themoviedb.org/3/search/movie?api_key=${this.options.env}&language=en-US&query=${value}&page=${page}&include_adult=false`)
       .then(res => {
         this.setState({
           shownList: res.data.results,

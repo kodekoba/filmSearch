@@ -79,10 +79,6 @@ class SearchHeader extends Component {
     searchValue: ''
   }
   
-//   constructor(props) {
-//     super(props);
-//   }
-  
   onSearchUpdate = (event) => {
     this.setState({
       searchValue: event.target.value
@@ -96,11 +92,11 @@ class SearchHeader extends Component {
     return (
       <header className="blackBackground">
         <div className='pictureStyle'>
-            <Link to="/">
-                <title className="filmSearchTitle">
-                    filmSearch
-                </title>
-            </Link>
+          <Link to="/">
+            <title className="filmSearchTitle">
+              filmSearch
+            </title>
+          </Link>
 
           <h2 className="findYourMovie">FIND YOUR MOVIE</h2>
           <TextField

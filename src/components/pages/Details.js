@@ -5,9 +5,11 @@ import Footer from '../layout/Footer';
 
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Button from '@material-ui/core/Button';
-import axios from 'axios';
+
+import { detailspageHelper } from '../../lib/detailspageHelper';
 
 class Details extends Component {
+
   state = {
     genreMap:{},
     similarMoviesList: [],
@@ -17,9 +19,16 @@ class Details extends Component {
     director: null,
   }
 
+  options = { }
+
   constructor(props) {
     super(props);
     this.state.movie_id = this.props.match.params.id;
+
+    this.options = {
+      env: 'b0be95ae49326c255b2b818fcb1beb1d', //process.env.REACT_APP_API_KEY,
+      movie_id: this.state.movie_id
+    }
   }
 
   componentDidMount(){
@@ -27,53 +36,50 @@ class Details extends Component {
     this.allRequests();
   }
 
+  getAllGenres = () => {
+
+    detailspageHelper.getAllGenres(this.options, (res) => {
+      let tempMap = {}
+      let genreObjs = res.data.genres;
+      for (let i in genreObjs) {
+        let key = genreObjs[i].id.toString();
+        let value = genreObjs[i].name;
+        tempMap[key] = value;
+      }
+      this.setState({
+        genreMap: tempMap
+      });
+    });
+  }
+
+  allRequests = () => {
+
+    detailspageHelper.getMovieInfo(this.options, (res) => {
+      this.setState({
+        selectedMovieInfo: res.data
+      });
+    });
+
+    detailspageHelper.getMovieCredits(this.options, (res) => {
+      this.setState({
+        director: res.data.crew[0].name,
+        selectedMovieCast: res.data.cast.slice(1,10)
+      });
+    });
+
+    detailspageHelper.getSimilarMovies(this.options, (res) => {
+      this.setState({
+        similarMoviesList: res.data.results
+      });
+    });
+
+  }
+
   setMovieId = (movie) => {
     this.setState({
       movie_id: movie.movie_id
     })
-  }
-
-  getAllGenres = () => {
-    let env = process.env.REACT_APP_API_KEY;
-    axios.get(`https://api.themoviedb.org/3/genre/movie/list?api_key=${env}&language=en-US`)
-      .then(res => {
-        let tempMap = {}
-        let genreObjs = res.data.genres;
-        for (let i in genreObjs) {
-          let key = genreObjs[i].id.toString();
-          let value = genreObjs[i].name;
-          tempMap[key] = value;
-        }
-        this.setState({
-          genreMap: tempMap
-        });
-      });
-  }
-
-  allRequests = () => {
-    document.getElementById("topElement").scrollIntoView({block:'start',behavior:'smooth'});
-    let env = process.env.REACT_APP_API_KEY;
-    let movie_id = this.state.movie_id;
-    axios.get(`https://api.themoviedb.org/3/movie/${movie_id}?api_key=${env}&language=en-US`)
-      .then(res => {
-        this.setState({
-          selectedMovieInfo: res.data
-        });
-      });
-    axios.get(`https://api.themoviedb.org/3/movie/${movie_id}/credits?api_key=${env}`)
-      .then(res => {
-        this.setState({
-          director: res.data.crew[0].name,
-          selectedMovieCast: res.data.cast.slice(1,10)
-        });
-      });
-    axios.get(`https://api.themoviedb.org/3/movie/${movie_id}/similar?api_key=${env}&language=en-US&page=1`)
-      .then(res => {
-        this.setState({
-          similarMoviesList: res.data.results
-        });
-      });
-  }
+  } 
 
   getSelectedMovieYear = () => {
     let year_string = '' + this.state.selectedMovieInfo.release_date;
@@ -88,13 +94,12 @@ class Details extends Component {
     return cast_string.substring(0, cast_string.length - 2);
   }
 
-
-  render(){
+  render() {
 
     let getYear = ({movie}) => {
       let year_string = '' + movie.release_date;
       return year_string.substring(0, 4);
-    }
+    };
 
     let getGenres = ({movie}) => {
       let genre_string = '';
@@ -102,16 +107,18 @@ class Details extends Component {
         genre_string += this.state.genreMap[movie.genre_ids[genre_id]] + ", ";
       }
       return genre_string.substring(0, genre_string.length - 2);
-    }
+    };
 
-    let movies = this.state.similarMoviesList.map((movie, i)=>{
+    let movies = this.state.similarMoviesList.map((movie, i) => {
       return (
         <div className="resultItemStyle" key={i}>
+
           <Link to={`/details/${movie.id}`} onClick={() => this.setState({
               movie_id:movie.id
             },() => this.allRequests())}>
             <img src={`https://image.tmdb.org/t/p/w300_and_h450_bestv2${movie.poster_path}`} alt="" />
           </Link>
+
           <div className="movieTextStyle">
             <div className="movieFlexStyle">
               <div className="movieTitleStyle">{movie.title}</div>
@@ -119,28 +126,33 @@ class Details extends Component {
             </div>
             <span className="movieGenreStyle">{getGenres({movie})}</span>
           </div>
+
         </div>
       )
-    })
+    });
+
     return (
       <React.Fragment>
         <CssBaseline />
         <div className="App">
+
           <header className="detailsBlackBackground" id="topElement">
             <div className="detailsPictureStyle">
+
               <div>                
                 <title className="filmSearchTitle">
                     filmSearch
                 </title>
                 <Link to="/">
-                    <Button variant="contained" className="backToSearchButton" style={backToSearchButton}>
+                    <Button variant="contained" className="backToSearchButton">
                         BACK TO SEARCH
                     </Button>
                 </Link>
               </div>
+
               <div className='movieContent'>
                 <img className="movieContentImg" 
-                src={`https://image.tmdb.org/t/p/w300_and_h450_bestv2${this.state.selectedMovieInfo.poster_path}`} alt="" />
+                      src={`https://image.tmdb.org/t/p/w300_and_h450_bestv2${this.state.selectedMovieInfo.poster_path}`} alt="" />
                 <div className="movieContentInfo">
                   <div className="titleAndRating">
                     <h1 className="movieTitleHeader">{this.state.selectedMovieInfo.title}</h1>
@@ -156,34 +168,25 @@ class Details extends Component {
                   </p>
                 </div>
               </div>
+
             </div>
           </header>
+
           <div className="resultsInfoStyle">
             <div className="resultsInfoWidth">
               Similar Movies
             </div>
           </div>
+
           <div className="resultsStyle">
             {movies}
           </div>
-          <div className="paginationStyle">Page 1 of 1</div>
+
           <Footer />
         </div>
       </React.Fragment>
     );
   } 
-}
-
-const backToSearchButton = {
-  margin: '20px 0',
-  float: 'right',
-  textDecoration: 'none',
-  color: '#EB5757',
-  backgroundColor: '#F5F5F5',
-  border: 'none',
-  padding: '3px 30px',
-  fontWeight: 'bold',
-  fontSize: '20px'
 }
 
 export default Details;
