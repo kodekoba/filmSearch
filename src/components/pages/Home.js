@@ -78,29 +78,28 @@ class Home extends Component {
     });
   }
 
-  sortCallback(flag) {
-    
-    return function(objA, objB) {
-      
-      if(flag === 'date') {
-        return (objB.release_date).localeCompare(objA.release_date);
-      }
-      
-      if(flag === 'rate') {
-        return objB.vote_average - objA.vote_average;
-      }
-    }
-  }
-
   sortMovies(flag) {
+    
+    let options = flag == 'rate' ? 
+      Object.assign({sortBy: 'popularity.desc'}, this.options) : 
+      Object.assign({sortBy: 'release_date.desc'}, this.options);
+    
     if(this.state.searchIsEmpty) {
-      this.setState({
-        featuredList: this.state.featuredList.sort(this.sortCallback(flag))
+      
+      homepageHelper.getFeaturedMovies(options, (res) => {
+        this.setState({
+          featuredList: res.data.results
+        });
       });
+      
     } else {
-      this.setState({
-        shownList: this.state.shownList.sort(this.sortCallback(flag))
+      
+      homepageHelper.getFeaturedMovies(options, (res) => {
+        this.setState({
+          shownList: res.data.results
+        });
       });
+      
     }
   }
 
@@ -158,7 +157,7 @@ class Home extends Component {
       return genre_string.substring(0, genre_string.length - 2);
     }
 
-    movies = selector.map(function(movie, i) {      
+    movies = selector.map(function(movie, i) {
 
       return (
         <div className="resultItemStyle" key={i}>

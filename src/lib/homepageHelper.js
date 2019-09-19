@@ -3,8 +3,10 @@ import axios from 'axios';
 export const homepageHelper = {
 
   getFeaturedMovies: (options, cb) => {
+    
+    let sortBy = options.sortBy ? options.sortBy : 'popularity.desc';
 
-    axios.get(`https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&language=en-US&page=1&api_key=${options.env}`)
+    axios.get(`https://api.themoviedb.org/3/discover/movie?sort_by=${sortBy}&language=en-US&page=1&api_key=${options.env}`)
       .then(res => {
         cb(res);
       })
