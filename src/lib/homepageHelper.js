@@ -4,8 +4,7 @@ export const homepageHelper = {
 
   getFeaturedMovies: (options, cb) => {
 
-    axios.get(`https://api.themoviedb.org/3/discover/movie?
-      sort_by=popularity.desc&language=en-US&page=1&api_key=${options.env}`)
+    axios.get(`https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&language=en-US&page=1&api_key=${options.env}`)
       .then(res => {
         cb(res);
       })
@@ -26,8 +25,8 @@ export const homepageHelper = {
   },
   
   searchFilms: (options, value, page, cb) => {
-    axios.get(`https://api.themoviedb.org/3/search/movie?
-      api_key=${options.env}&language=en-US&query=${value}&page=${page}&include_adult=false`)
+    console.log(value)
+    axios.get(`https://api.themoviedb.org/3/search/movie?api_key=${options.env}&language=en-US&query=${value}&page=${page}&include_adult=false`)
       .then(res => {
         cb(res);
       })

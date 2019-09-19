@@ -101,7 +101,7 @@ class SearchHeader extends Component {
           <h2 className="findYourMovie">FIND YOUR MOVIE</h2>
           <TextField
             id='filled-search'
-            label='Click here to search by movie or director! '
+            label='Click here to search by movie name '
             placeholder='Search.. ┌(▀Ĺ̯ ▀-͠ )┐'
             type='search'
             fullWidth
@@ -123,15 +123,6 @@ class SearchHeader extends Component {
           />
 
           <div className="searchByDiv">
-            SEARCH BY
-            
-            <Button variant='contained' className={classes.searchByButtonOn}>
-               TITLE
-            </Button>
-            
-            <Button variant='contained' className={classes.searchByButtonOff}>
-              DIRECTOR
-            </Button>
                     
             <Button variant='contained' className={classes.searchButton} onClick={()=>this.props.searchValue(this.state.searchValue)}>
               SEARCH

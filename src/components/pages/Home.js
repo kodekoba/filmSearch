@@ -32,7 +32,7 @@ class Home extends Component {
     this.getAllGenres();
   }
   
-  getFeaturedMovies() {
+  getFeaturedMovies = () => {
     
     homepageHelper.getFeaturedMovies(this.options, (res) => {
       this.setState({
@@ -43,7 +43,7 @@ class Home extends Component {
     
   }
 
-  getAllGenres() {
+  getAllGenres = () => {
     
     homepageHelper.getAllGenres(this.options, (res) => {
       
