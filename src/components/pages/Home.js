@@ -7,6 +7,8 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import Button from '@material-ui/core/Button';
 import axios from 'axios';
 
+import { homepageHelper } from '../../lib/homepageHelper';
+
 class Home extends Component {
 
   options = {
@@ -26,65 +28,71 @@ class Home extends Component {
   }
   
   componentDidMount() {
-    let env = process.env.REACT_APP_API_KEY;
-    axios.get(`https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&language=en-US&page=1&api_key=${this.options.env}`)
-      .then(res => {
-        this.setState({featuredList: res.data.results})
-        this.state.sortByRating ? this.sortMovies('rate') : this.sortMovies('date')
-      })
-      .catch(error => {
-        console.log(error)
-      });
+    this.getFeaturedMovies();
     this.getAllGenres();
   }
-
-  getAllGenres = () => {
-    let env = process.env.REACT_APP_API_KEY;
-    axios.get(`https://api.themoviedb.org/3/genre/movie/list?api_key=${this.options.env}&language=en-US`)
-      .then(res => {
-        let tempMap = {}
-        let genreObjs = res.data.genres;
-        for (let i in genreObjs) {
-          let key = genreObjs[i].id.toString();
-          let value = genreObjs[i].name;
-          tempMap[key] = value;
-        }
-        this.setState({
-          genreMap: tempMap
-        });
+  
+  getFeaturedMovies() {
+    
+    homepageHelper.getFeaturedMovies(this.options, (res) => {
+      this.setState({
+        featuredList: res.data.results
       });
+      this.state.sortByRating ? this.sortMovies('rate') : this.sortMovies('date');
+    });
+    
+  }
+
+  getAllGenres() {
+    
+    homepageHelper.getAllGenres(this.options, (res) => {
+      
+      let tempMap = {}
+      let genreObjs = res.data.genres;
+      
+      for (let i in genreObjs) {
+        let key = genreObjs[i].id.toString();
+        let value = genreObjs[i].name;
+        tempMap[key] = value;
+      }
+      
+      this.setState({
+        genreMap: tempMap
+      });
+    });
+    
   }
 
   searchRequest(value) {
-    let env = process.env.REACT_APP_API_KEY;
+    
     let page = this.state.resultPage;
-    axios.get(`https://api.themoviedb.org/3/search/movie?api_key=${this.options.env}&language=en-US&query=${value}&page=${page}&include_adult=false`)
-      .then(res => {
-        this.setState({
-          shownList: res.data.results,
-          totalPages: res.data.total_pages,
-          totalResults: res.data.total_results
-        }, () => {
-          this.state.sortByRating ? this.sortMovies('rate') : this.sortMovies('date')
-        })
-      })
-      .catch(error => {
-        console.log(error)
-      })
+    
+    homepageHelper.searchFilms(this.options, value, page, (res) => {
+      this.setState({
+        shownList: res.data.results,
+        totalPages: res.data.total_pages,
+        totalResults: res.data.total_results
+      }, () => {
+        this.state.sortByRating ? this.sortMovies('rate') : this.sortMovies('date')
+      });
+    });
   }
 
   sortCallback(flag) {
+    
     return function(objA, objB) {
+      
       if(flag === 'date') {
         return (objB.release_date).localeCompare(objA.release_date);
       }
+      
       if(flag === 'rate') {
         return objB.vote_average - objA.vote_average;
       }
     }
   }
 
-  sortMovies = (flag) => {
+  sortMovies(flag) {
     if(this.state.searchIsEmpty) {
       this.setState({
         featuredList: this.state.featuredList.sort(this.sortCallback(flag))
@@ -109,12 +117,14 @@ class Home extends Component {
       searchIsEmpty: value.length ? false : true,
       searchVal: value.length ? value : '',
     },() => {
-      value.length ? this.searchRequest(value) : this.setState({shownList: []})
+      value.length ? this.searchRequest(value) : this.setState({shownList: []});
     });
   }
 
   navigatePages = (flag) => {
+    
     document.getElementById("resultsElement").scrollIntoView({block:'start',behavior:'smooth'});
+    
     if(flag === "back") {
       this.setState({
         resultPage: this.state.resultPage - 1,

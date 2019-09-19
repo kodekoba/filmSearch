@@ -2,8 +2,6 @@ import axios from 'axios';
 
 export const detailspageHelper = {
 
-  env: process.env.REACT_APP_API_KEY,
-
   getAllGenres: (options, cb) => {
 
     axios.get(`https://api.themoviedb.org/3/genre/movie/list?api_key=${options.env}&language=en-US`)
