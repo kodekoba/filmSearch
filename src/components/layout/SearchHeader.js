@@ -67,7 +67,10 @@ const styles = theme => ({
     '&:after': {
       borderBottom: '3px solid red'
     }
-  }
+  },
+  disabled: {},
+  focused: {},
+  error: {},
 });
 
 class SearchHeader extends Component {
@@ -76,9 +79,9 @@ class SearchHeader extends Component {
     searchValue: ''
   }
   
-  constructor(props) {
-    super(props);
-  }
+//   constructor(props) {
+//     super(props);
+//   }
   
   onSearchUpdate = (event) => {
     this.setState({
@@ -93,9 +96,11 @@ class SearchHeader extends Component {
     return (
       <header className="blackBackground">
         <div className='pictureStyle'>
-          <title className="filmSearchTitle">
-            filmSearch
-          </title>
+            <Link to="/">
+                <title className="filmSearchTitle">
+                    filmSearch
+                </title>
+            </Link>
 
           <h2 className="findYourMovie">FIND YOUR MOVIE</h2>
           <TextField
