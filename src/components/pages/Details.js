@@ -26,7 +26,7 @@ class Details extends Component {
     this.state.movie_id = this.props.match.params.id;
 
     this.options = {
-      env: 'b0be95ae49326c255b2b818fcb1beb1d', //process.env.REACT_APP_API_KEY,
+      env: process.env.REACT_APP_API_KEY,
       movie_id: this.state.movie_id
     }
   }

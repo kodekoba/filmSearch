@@ -27,7 +27,7 @@ export const homepageHelper = {
   },
   
   searchFilms: (options, value, page, cb) => {
-    console.log(value)
+    
     axios.get(`https://api.themoviedb.org/3/search/movie?api_key=${options.env}&language=en-US&query=${value}&page=${page}&include_adult=false`)
       .then(res => {
         cb(res);

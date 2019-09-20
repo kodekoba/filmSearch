@@ -12,7 +12,7 @@ import { homepageHelper } from '../../lib/homepageHelper';
 class Home extends Component {
 
   options = {
-    env: 'b0be95ae49326c255b2b818fcb1beb1d', //process.env.REACT_APP_API_KEY,
+    env: process.env.REACT_APP_API_KEY,
   }
 
   state = {
@@ -94,7 +94,7 @@ class Home extends Component {
       
     } else {
       
-      homepageHelper.getFeaturedMovies(options, (res) => {
+      homepageHelper.searchFilms(options, this.state.searchVal, 1, (res) => {
         this.setState({
           shownList: res.data.results
         });
@@ -192,7 +192,7 @@ class Home extends Component {
                 {!this.state.searchIsEmpty ? this.state.totalResults : this.state.featuredList.length} movies found
               </span>
       
-              <div className="sortByStyle">
+              <div className="sortByStyle" style={{ visibility: this.state.searchIsEmpty ? 'visible' : 'hidden' }} >
                 <div className="sortByLabelStyle">Sort by</div>
                 {
                   this.state.sortByRating === true ? 
