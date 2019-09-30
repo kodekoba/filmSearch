@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import { withStyles } from '@material-ui/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+
+import { setSearchValue } from '../../actions/homeActions'
 
 const styles = theme => ({
   container: {
@@ -75,14 +78,8 @@ const styles = theme => ({
 
 class SearchHeader extends Component {
   
-  state = {
-    searchValue: ''
-  }
-  
   onSearchUpdate = (event) => {
-    this.setState({
-      searchValue: event.target.value
-    });
+    this.props.setSearchValue(event.target.value);
   }
   
   render() {
@@ -124,7 +121,7 @@ class SearchHeader extends Component {
 
           <div className="searchByDiv">
                     
-            <Button variant='contained' className={classes.searchButton} onClick={()=>this.props.searchValue(this.state.searchValue)}>
+            <Button variant='contained' className={classes.searchButton} onClick={()=>this.props.searchValue(this.props.home.searchVal)}>
               SEARCH
             </Button>
           </div>
@@ -139,4 +136,18 @@ SearchHeader.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(SearchHeader);
+const mapStateToProps = (state) => {
+  return {
+    home: state.home
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    setSearchValue: (searchVal) => {
+      dispatch(setSearchValue(searchVal));
+    },
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(withStyles(styles)(SearchHeader));
