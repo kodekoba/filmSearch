@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
+import { connect } from 'react-redux';
+
 import SearchHeader from '../layout/SearchHeader';
 import Footer from '../layout/Footer';
 
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Button from '@material-ui/core/Button';
-import axios from 'axios';
 
 import { homepageHelper } from '../../lib/homepageHelper';
+import * as HomeActions from '../../actions/homeActions';
 
 class Home extends Component {
 
@@ -15,146 +17,182 @@ class Home extends Component {
     env: process.env.REACT_APP_API_KEY,
   }
 
-  state = {
-    genreMap:{},
-    featuredList: [],
-    shownList:[],
-    searchIsEmpty: true,
-    searchVal: '',
-    sortByRating: true,
-    resultPage: 1,
-    totalPages: 1,
-    totalResults: 0,
+  UNSAFE_componentWillMount() {
+
+    if (this.isEmpty(this.props.home.genreMap)) {
+
+      this.getAllGenres();
+    
+    }
+
   }
   
   componentDidMount() {
+
     this.getFeaturedMovies();
-    this.getAllGenres();
+  
+  }
+
+  isEmpty = (map) => {
+
+    for (let prop in map) {
+        if (map.hasOwnProperty(prop)) return false;
+    }
+
+    return true;
+  
   }
   
-  getFeaturedMovies = () => {
+  getAllGenres = () => {
     
-    homepageHelper.getFeaturedMovies(this.options, (res) => {
-      this.setState({
-        featuredList: res.data.results
-      });
-      this.state.sortByRating ? this.sortMovies('rate') : this.sortMovies('date');
+    homepageHelper.getAllGenres(this.options, (res, error) => {
+
+      if (error){
+
+        this.props.setGenreMapFail(error);
+
+      } else {
+        
+        let tempMap = {}
+        let genreObjs = res.data.genres;
+        
+        for (let i in genreObjs) {
+          let key = genreObjs[i].id.toString();
+          let value = genreObjs[i].name;
+          tempMap[key] = value;
+        }
+        
+        this.props.setGenreMapSuccess(tempMap);
+
+      }
+
     });
     
   }
 
-  getAllGenres = () => {
-    
-    homepageHelper.getAllGenres(this.options, (res) => {
+  getFeaturedMovies = () => {
+
+    homepageHelper.getFeaturedMovies(this.options, (res, error) => {
+
+      if(error){
+
+        this.props.setFeaturedListFail(error);
+
+      } else {
+
+        this.props.setFeaturedListSuccess(res.data.results);
       
-      let tempMap = {}
-      let genreObjs = res.data.genres;
-      
-      for (let i in genreObjs) {
-        let key = genreObjs[i].id.toString();
-        let value = genreObjs[i].name;
-        tempMap[key] = value;
       }
-      
-      this.setState({
-        genreMap: tempMap
-      });
+
     });
-    
+
   }
 
   searchRequest(value) {
     
-    let page = this.state.resultPage;
-    
-    homepageHelper.searchFilms(this.options, value, page, (res) => {
-      this.setState({
-        shownList: res.data.results,
-        totalPages: res.data.total_pages,
-        totalResults: res.data.total_results
-      }, () => {
-        this.state.sortByRating ? this.sortMovies('rate') : this.sortMovies('date')
-      });
+    homepageHelper.searchFilms(this.options, value, this.props.home.resultPage, (res, error) => {
+
+      if (error) {
+
+        this.props.searchFilmsFail(error);
+
+      } else {
+
+        this.props.setShownListSuccess(res.data.results);
+        this.props.setTotalPagesSuccess(res.data.total_pages);
+        this.props.setTotalResultsSuccess(res.data.total_results); 
+
+      }
+
     });
+
   }
 
   sortMovies(flag) {
+
+    let options = flag === 'rate' ? 
+      this.options.sortBy = 'popularity.desc' : 
+      this.options.sortBy = 'release_date.desc';
     
-    let options = flag == 'rate' ? 
-      Object.assign({sortBy: 'popularity.desc'}, this.options) : 
-      Object.assign({sortBy: 'release_date.desc'}, this.options);
-    
-    if(this.state.searchIsEmpty) {
-      
-      homepageHelper.getFeaturedMovies(options, (res) => {
-        this.setState({
-          featuredList: res.data.results
-        });
+    if (this.props.home.searchIsEmpty) {
+
+      homepageHelper.getFeaturedMovies(this.options, (res, error)=>{
+        if(error){
+          this.props.setFeaturedListFail(error);
+        } else {
+          this.props.setFeaturedListSuccess(res.data.results);
+        }
       });
       
     } else {
       
-      homepageHelper.searchFilms(options, this.state.searchVal, 1, (res) => {
-        this.setState({
-          shownList: res.data.results
-        });
-      });
+      homepageHelper.searchFilms(options, this.props.home.searchVal, this.props.home.resultPage, (res) => {
+
+        this.props.setShownList(res.data.results);
       
+      });
+
     }
+
   }
 
   flipSort(flag) {
-    this.setState({
-      sortByRating: !this.state.sortByRating
-    });
+
+    this.props.home.sortByRating ? this.props.flipSortByRating(false) : this.props.flipSortByRating(true);
     this.sortMovies(flag);
+
   }
   
-  searchHandler = (value) => {
-    this.setState({
-      resultPage: 1,
-      searchIsEmpty: value.length ? false : true,
-      searchVal: value.length ? value : '',
-    },() => {
-      value.length ? this.searchRequest(value) : this.setState({shownList: []});
-    });
+  searchHandler = async (value) => {
+
+    await this.props.setResultPage(1)
+    value.length ? this.props.flipSearchIsEmpty(false) : this.props.flipSearchIsEmpty(true);
+    value.length ? this.props.setSearchValue(value) : this.props.setSearchValue('');
+    value.length ? this.searchRequest(value) : this.props.setShownList([]);
+
   }
 
-  navigatePages = (flag) => {
+  navigatePages = async (flag) => {
     
     document.getElementById("resultsElement").scrollIntoView({block:'start',behavior:'smooth'});
     
-    if(flag === "back") {
-      this.setState({
-        resultPage: this.state.resultPage - 1,
-        },() => {
-          this.searchRequest(this.state.searchVal)
-        });
-    } else if(flag === "forward") {
-      this.setState({
-        resultPage: this.state.resultPage + 1,
-        },() => {
-          this.searchRequest(this.state.searchVal)
-        });
-    }
+      if (flag === "back") {
+
+        await this.props.setResultPage(this.props.home.resultPage - 1)
+
+      } else if (flag === "forward") {
+
+        await this.props.setResultPage(this.props.home.resultPage + 1)
+
+      }
+    
+    this.searchRequest(this.props.home.searchVal);
+
   }
 
   render() {
     
     let movies;
-    let selector = this.state.shownList.length ? this.state.shownList : this.state.featuredList;
+    let selector = this.props.home.shownList.length ? this.props.home.shownList : this.props.home.featuredList;
     
     let getYear = ({movie}) => {
+
       let year_string = '' + movie.release_date;
       return year_string.substring(0, 4);
+
     }
 
     let getGenres = ({movie}) => {
+
       let genre_string = '';
       for (let genre_id in movie.genre_ids) {
-        genre_string += this.state.genreMap[movie.genre_ids[genre_id]] + ", ";
+
+        genre_string += this.props.home.genreMap[movie.genre_ids[genre_id]] + ", ";
+
       }
+
       return genre_string.substring(0, genre_string.length - 2);
+
     }
 
     movies = selector.map(function(movie, i) {
@@ -174,6 +212,7 @@ class Home extends Component {
           </div>
         </div>
       )
+      
     })
 
     return (
@@ -189,13 +228,19 @@ class Home extends Component {
             <div className="resultsInfoWidth">
       
               <span className="moviesFoundStyle">
-                {!this.state.searchIsEmpty ? this.state.totalResults : this.state.featuredList.length} movies found
+                {
+                  this.props.home.searchIsEmpty ? 
+
+                  <span>Featured Movies</span>
+                  : 
+                  <span>{this.props.home.totalResults} movies found</span>
+                }
               </span>
       
-              <div className="sortByStyle" style={{ visibility: this.state.searchIsEmpty ? 'visible' : 'hidden' }} >
+              <div className="sortByStyle" style={{ visibility: this.props.home.searchIsEmpty ? 'visible' : 'hidden' }} >
                 <div className="sortByLabelStyle">Sort by</div>
                 {
-                  this.state.sortByRating === true ? 
+                  this.props.home.sortByRating ? 
                   
                   <div className="inlineStyle">
                     <span className="disabledStyle" onClick={ () => this.flipSort('date') } >release date </span> | 
@@ -212,7 +257,7 @@ class Home extends Component {
             
           </div>
           {
-            this.state.shownList.length === 0 && !this.state.searchIsEmpty ? 
+            this.props.home.shownList.length === 0 && !this.props.home.searchIsEmpty ? 
           
             <div className="noMoviesStyle">
               <h1>No Films Found!! ʸ(➜◡ु⚈᷉)♡⃛</h1>
@@ -227,15 +272,15 @@ class Home extends Component {
           
         <div className="paginationStyle">
           {
-            this.state.resultPage === 1  ? 
-            <Button className="noDisplayNav"> back </Button> 
+            this.props.home.resultPage === 1  ? 
+            null
             : 
             <Button className="displayNav" onClick={ () => this.navigatePages('back') }> back </Button>
           }
-          Page {this.state.resultPage} of {this.state.totalPages ? this.state.totalPages : 1}
+          Page {this.props.home.resultPage} of {this.props.home.totalPages ? this.props.home.totalPages : 1}
           {
-            this.state.resultPage === this.state.totalPages  ? 
-            <Button className="noDisplayNav"> forward </Button> 
+            this.props.home.resultPage === this.props.home.totalPages  ? 
+            null
             : 
             <Button className="displayNav" onClick={ () => this.navigatePages('forward') }> next </Button>
           }
@@ -247,4 +292,42 @@ class Home extends Component {
   }
 }
 
-export default Home;
+const mapStateToProps = (state) => {
+  return {
+    home: state.home
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+
+  return {
+
+    setGenreMapSuccess: (genreMap) => {dispatch(HomeActions.setGenreMapSuccess(genreMap))},
+    setGenreMapFail: (error) => {dispatch(HomeActions.setGenreMapFail(error))},
+    
+    setFeaturedListSuccess: (featuredList) => {dispatch(HomeActions.setFeaturedListSuccess(featuredList))},
+    setFeaturedListFail: (error) => {dispatch(HomeActions.setFeaturedListFail(error))},
+
+    setShownListSuccess: (shownList) => {dispatch(HomeActions.setShownListSuccess(shownList))},
+    setTotalPagesSuccess: (totalPages) => {dispatch(HomeActions.setTotalPagesSuccess(totalPages))},
+    setTotalResultsSuccess: (totalResults) => {dispatch(HomeActions.setTotalResultsSuccess(totalResults))},
+
+    searchFilmsFail: (error) => {dispatch(HomeActions.searchFilmsFail(error))},
+
+    flipSearchIsEmpty: (searchIsEmpty) => {
+      dispatch(HomeActions.flipSearchIsEmpty(searchIsEmpty));
+    },
+    flipSortByRating: (sortByRating) => {
+      dispatch(HomeActions.flipSortByRating(sortByRating));
+    },
+    setSearchValue: (searchVal) => {
+      dispatch(HomeActions.setSearchValue(searchVal));
+    },
+    setResultPage: (resultPage) => {
+      dispatch(HomeActions.setResultPage(resultPage));
+    },
+    
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Home);
