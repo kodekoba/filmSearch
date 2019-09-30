@@ -8,7 +8,7 @@ const homeReducer = (state = {
         sortByRating: true,
         searchVal: '',
         resultPage: 1,
-    }, action) => {
+    }, action = {}) => {
         switch (action.type) {
             case "SET_GENRE_MAP_SUCCESS":
                 state = {
