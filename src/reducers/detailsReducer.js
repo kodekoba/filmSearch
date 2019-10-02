@@ -3,7 +3,7 @@ const detailsReducer = (state = {
         selectedMovieInfo: {},
         selectedMovieCast: [],
         director: '',
-    }, action) => {
+    }, action = {}) => {
         switch (action.type) {
             case "SET_SIMILAR_MOVIES_LIST_SUCCESS": 
                 state = {
