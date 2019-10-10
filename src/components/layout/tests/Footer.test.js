@@ -1,18 +1,16 @@
+import React from 'react';
 import Footer from '../Footer';
+import renderer from 'react-test-renderer';
 
-import React from 'react'
-import CssBaseline from '@material-ui/core/CssBaseline';
-
-describe('Testing Footer', () => {
-    it('Should return static content without action', () => {
-        expect(Footer()).toStrictEqual(
-            <React.Fragment>
-                <CssBaseline />
-                <footer className="footerStyle">
-                    <span>filmSearch ⓒ 2019 built with</span>
-                    <img alt="" className="tmdbStyle" src="https://www.themoviedb.org/assets/2/v4/logos/408x161-powered-by-rectangle-green-bb4301c10ddc749b4e79463811a68afebeae66ef43d17bcfd8ff0e60ded7ce99.png" />
-                </footer>
-            </React.Fragment>
-        );
-    });
+describe('Footer', () => {
+  
+  it('matches snapshot', () => {
+    
+    const tree = renderer.create(
+      <Footer/>
+    ).toJSON();
+    
+    expect(tree).toMatchSnapshot();
+  });
+  
 });
