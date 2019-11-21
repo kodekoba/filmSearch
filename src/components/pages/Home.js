@@ -47,7 +47,7 @@ class Home extends Component {
     
     homepageHelper.getAllGenres(this.options, (res, error) => {
 
-      if (error){
+      if (error) {
 
         this.props.setGenreMapFail(error);
 

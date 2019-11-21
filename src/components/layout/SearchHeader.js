@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import { withStyles } from '@material-ui/styles';
 import TextField from '@material-ui/core/TextField';
-import Button from '@material-ui/core/Button';
+// import Button from '@material-ui/core/Button';
 
 import { setSearchValue } from '../../actions/homeActions'
+import HeaderLink from './SearchHeader/HeaderLink'
+import SearchByDiv from './SearchHeader/SearchByDiv';
 
 const styles = theme => ({
   container: {
@@ -26,35 +27,6 @@ const styles = theme => ({
     fontSize: '20px',
     '&:hover': {
       backgroundColor: '#E86D6D',
-    },
-  },
-  searchByButtonOn:{
-    margin: '0 10px',
-    textDecoration: 'none',
-    backgroundColor: '#EB5757',
-    color: '#F5F5F5',
-    border: 'none',
-    padding: '3px 40px',
-    fontFamily: 'Arial',
-    fontWeight: 'bold',
-    fontSize: '20px',
-    '&:hover': {
-      backgroundColor: '#E86D6D',
-    },
-  },
-  searchByButtonOff:{
-    margin: '0 10px',
-    textDecoration: 'none',
-    backgroundColor: '#333333',
-    color: '#828282',
-    border: 'none',
-    padding: '3px 40px',
-    fontFamily: 'Arial',
-    fontWeight: 'bold',
-    fontSize: '20px',
-    '&:hover': {
-      backgroundColor: '#333333',
-      cursor: 'default',
     },
   },
   menu: {
@@ -89,11 +61,8 @@ class SearchHeader extends Component {
     return (
       <header className="blackBackground">
         <div className='pictureStyle'>
-          <Link to="/">
-            <title className="filmSearchTitle">
-              filmSearch
-            </title>
-          </Link>
+
+          <HeaderLink />
 
           <h2 className="findYourMovie">FIND YOUR MOVIE</h2>
           <TextField
@@ -119,12 +88,15 @@ class SearchHeader extends Component {
             }}
           />
 
-          <div className="searchByDiv">
+          {/* <div className="searchByDiv">
                     
             <Button variant='contained' className={classes.searchButton} onClick={()=>this.props.searchValue(this.props.home.searchVal)}>
               SEARCH
             </Button>
-          </div>
+
+          </div> */}
+
+          <SearchByDiv searchValue={this.props.home.searchVal}/>
             
         </div>
       </header>

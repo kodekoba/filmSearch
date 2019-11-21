@@ -1,13 +1,13 @@
 import React from 'react';
-import SearchHeader from '../SearchHeader';
+import HeaderLink from '../SearchHeader/HeaderLink';
 import renderer from 'react-test-renderer';
 
-describe('SearchHeader', () => {
+describe('HeaderLink', () => {
   
   it('matches snapshot', () => {
     
     const tree = renderer.create(
-      <SearchHeader/>
+      <HeaderLink />
     ).toJSON();
     
     expect(tree).toMatchSnapshot();
